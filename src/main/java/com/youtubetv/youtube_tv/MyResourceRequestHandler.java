@@ -5,6 +5,10 @@ import org.cef.handler.CefResourceHandler;
 import org.cef.handler.CefResourceRequestHandler;
 import org.cef.misc.BoolRef;
 import org.cef.misc.StringRef;
+
+import java.net.URL;
+import java.util.Locale;
+
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.network.CefRequest;
@@ -13,14 +17,22 @@ import org.cef.network.CefURLRequest.Status;
 
 public class MyResourceRequestHandler implements CefResourceRequestHandler {
     private final String userAgent;
+	//private final String acceptLanguage;
 
     public MyResourceRequestHandler(String userAgent) {
         this.userAgent = userAgent;
+		//this.acceptLanguage = acceptLanguage;
     }
 
     @Override
     public boolean onBeforeResourceLoad(CefBrowser browser, CefFrame frame, CefRequest request) {
+		String systemLanguage = Locale.getDefault().toLanguageTag();
+		//request.setHeaderByName("accept-language", acceptLanguage, true); 
         request.setHeaderByName("User-Agent", userAgent, true);
+		
+		
+		
+		System.out.println(systemLanguage);
         return false;  // Continuer le chargement
     }
 
@@ -33,6 +45,9 @@ public class MyResourceRequestHandler implements CefResourceRequestHandler {
 	@Override
 	public CefResourceHandler getResourceHandler(CefBrowser browser, CefFrame frame, CefRequest request) {
 		// TODO Auto-generated method stub
+
+			String systemLanguage = System.getProperty("user.language") + "-" + System.getProperty("user.country");
+			request.setHeaderByName("accept.language", systemLanguage, true);
 		return null;
 	}
 

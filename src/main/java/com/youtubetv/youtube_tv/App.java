@@ -4,13 +4,21 @@
 
 package com.youtubetv.youtube_tv;
 
+import java.util.Locale;
+import java.io.File;
+
 import me.friwi.jcefmaven.*;
+import me.friwi.jcefmaven.impl.step.init.CefInitializer;
+
 import org.cef.CefApp;
+import org.cef.CefBrowserSettings;
 import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
+import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
+import org.cef.browser.CefRequestContext;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
 //import org.cef.handler.CefRequestHandlerAdapter;
@@ -19,6 +27,13 @@ import org.cef.handler.CefFocusHandlerAdapter;
 //import org.cef.misc.IntRef;
 //import org.cef.network.CefRequest;
 import org.cef.handler.CefLoadHandlerAdapter;
+import org.cef.handler.CefRequestContextHandler;
+import org.cef.handler.CefRequestContextHandlerAdapter;
+import org.cef.handler.CefResourceRequestHandler;
+import org.cef.handler.CefResourceRequestHandlerAdapter;
+import org.cef.misc.IntRef;
+import org.cef.network.CefRequest;
+import org.cef.network.CefURLRequest;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +85,24 @@ public class App extends JFrame {
         
         if (args.length > 0) {
         	builder.addJcefArgs(args);
+        
+
+            
         }
+
+        // Activer la persistance des cookies de session
+        builder.getCefSettings().persist_session_cookies = true; // Important pour que les sessions persistent
+        
+        // Récupérer le chemin du répertoire où se trouve le JAR
+        File jarDir = new File(CefApp.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile();
+        String cachePath = new File(jarDir, "cache").getAbsolutePath(); // Créer un dossier "cache" à côté du JAR
+
+        // Configurer un chemin de cache pour stocker les données
+        builder.getCefSettings().cache_path = cachePath ;
+
+        System.out.println("CEF lancé avec le cache dans le répertoire : " + cachePath);
+
+
 
         // (1) The entry point to JCEF is always the class CefApp. There is only one
         //     instance per application and therefore you have to call the method
@@ -85,8 +117,11 @@ public class App extends JFrame {
         //     build the CefApp on first run and fetch the instance on all consecutive
         //     runs. This method is thread-safe and will always return a valid app
         //     instance.
+        String systemLanguage = Locale.getDefault().getLanguage();
+        
+        builder.addJcefArgs("--lang", systemLanguage);
         cefApp_ = builder.build();
-
+        
         // (2) JCEF can handle one to many browser instances simultaneous. These
         //     browser instances are logically grouped together by an instance of
         //     the class CefClient. In your application you can create one to many
@@ -102,12 +137,8 @@ public class App extends JFrame {
         //     behavior of the browser. See tests.detailed.MainFrame for an example
         //     of how to use these handlers.
         
-
-        
         client_ = cefApp_.createClient();
         
-
-
         // (3) Create a simple message router to receive messages from CEF.
         CefMessageRouter msgRouter = CefMessageRouter.create();
         client_.addMessageRouter(msgRouter);
@@ -124,11 +155,11 @@ public class App extends JFrame {
         //     by calling the method "getUIComponent()" on the instance of CefBrowser.
         //     The UI component is inherited from a java.awt.Component and therefore
         //     it can be embedded into any AWT UI.
-        browser_ = client_.createBrowser(startURL, false, false);
-        
-     // Assigner le gestionnaire personnalisé
+
+        browser_ = client_.createBrowser(startURL, false, isTransparent);
+
+        // Assigner le gestionnaire personnalisé
         browser_.getClient().addRequestHandler(new MyRequestHandler("Mozilla/5.0 (Web0S; Linux/SmartTV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.71 Safari/537.36 DMOST/2.0.0 (; LGE; webOSTV; WEBOS6.0.1 03.10.26; W6_lm21u;)"));
-        
         browerUI_ = browser_.getUIComponent();
 
         // (5) For this minimal browser, we need only a text field to enter an URL
@@ -211,49 +242,35 @@ public class App extends JFrame {
             public void windowClosing(WindowEvent e) {
                 CefApp.getInstance().dispose();
                 dispose();
+
             }
         });
-        
-        
-     // Vérifie d'abord si l'URL correspond à "https://www.youtube.com/tv#/"
-        String checkUrlScript = 
-        		"alert('helloqsd');";
 
-        	browser_.executeJavaScript(checkUrlScript, browser_.getURL(), 0);
+        // Gestionnaire de chargement de la page
+        client_.addLoadHandler(new CefLoadHandlerAdapter() {
+        	public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
+        	    String loadScript =     	        		
+        	        "const observer = new MutationObserver(() => {" +
+        	            //    "var thumbnailDetails = document.querySelector(`ytlr-thumbnail-details tabindex='-1' class='ytlr-thumbnail-details--full-height ytlr-thumbnail-details--bg-hundred-percent ytlr-thumbnail-details'`);" +
+                        "var thumbnailDetails = document.getElementsByClassName('ytlr-thumbnail-details--bg-contain ytlr-thumbnail-details ytlr-entity-metadata-renderer__thumbnail')[0];" +
 
-        	// Gestionnaire de chargement de la page
-        	client_.addLoadHandler(new CefLoadHandlerAdapter() {
-        	    public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
-        	        String loadScript = 
-//        	            "console.log('Le script est injecté après chargement de la page');" +
-//        	            "setTimeout(function() {" + // Délai avant modification
-//        	                "var thumbnailDetails = document.querySelector('ytlr-thumbnail-details');" + 
-//        	                "if (thumbnailDetails) {" +
-//        	                    "thumbnailDetails.style.backgroundColor = 'orange';" + // Changer encore après délai
-//        	                    "console.log('Modifié après 2 secondes');" +
-//        	                    "alert('hello');" +
-//        	                "}" +
-//        	            "}, 2000);"; 
-        	        		
-        	        		"const observer = new MutationObserver(() => {" +
-        	        		    "var thumbnailDetails = document.querySelector('ytlr-thumbnail-details');" +
-        	        		    "if (thumbnailDetails) {" +
-        	        		    //    "thumbnailDetails.style.backgroundColor = 'orange';" +
-        	        		        // Remplacer l'URL de l'image dans le style
-        	        		        "thumbnailDetails.style.backgroundImage = 'url(\"https://image.noelshack.com/fichiers/2024/41/6/1728685934-steamdeck-12-10-2024.png\")';" + // Modifie uniquement le style
-        	                        "console.log('URL de l\\'image remplacée');" +
-        	        		    "}" +
-        	        		"});" +
+        	            "if (thumbnailDetails) {" +
+        	        	    //    "thumbnailDetails.style.backgroundColor = 'orange';" +
+        	        	    // Remplacer l'URL de l'image dans le style
+        	        	    "thumbnailDetails.style.backgroundImage = 'url(\"https://image.noelshack.com/fichiers/2024/41/6/1728685934-steamdeck-12-10-2024.png\")';" + // Modifie uniquement le style
+        	                "console.log('URL de l\\'image remplacée');" +
+        	        	"}" +
+        	        "});" +
 
-        	        		// Configurer l'observateur pour surveiller les changements d'enfants dans le body
-        	        		"observer.observe(document.body, {" +
-        	        		    "childList: true," +
-        	        		    "subtree: true" +
-        	        		"});";
+        	        // Configurer l'observateur pour surveiller les changements d'enfants dans le body
+        	        "observer.observe(document.body, {" +
+        	        	"childList: true," +
+        	        	"subtree: true" +
+        	        "});";
 
-        	        browser.executeJavaScript(loadScript, browser.getURL(), 0);
-        	    }
-        	});
+        	    browser.executeJavaScript(loadScript, browser.getURL(), 0);
+        	}
+        });
 
         
         

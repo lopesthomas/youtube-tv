@@ -1,4 +1,9 @@
 debug.log
+target
+testes/
+build/
+!build/youtube-tv.jar
+jcef-bundle/
 jcef-bundle/build_meta.json
 jcef-bundle/chrome_100_percent.pak
 jcef-bundle/chrome_200_percent.pak
