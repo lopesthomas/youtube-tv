@@ -5,7 +5,9 @@
 package com.youtubetv.youtube_tv;
 
 import me.friwi.jcefmaven.*;
+import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 import me.friwi.jcefmaven.impl.step.init.CefInitializer;
+import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler; // Assurez-vous que ce package est correct
 
 import org.cef.CefApp;
 import org.cef.CefBrowserSettings;
@@ -28,6 +30,8 @@ import org.cef.misc.IntRef;
 import org.cef.network.CefRequest;
 import org.cef.network.CefURLRequest;
 
+import com.jogamp.opengl.util.av.GLMediaPlayer.State;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -47,6 +51,31 @@ public class App extends JFrame {
     private App(String startURL, boolean useOSR, boolean isTransparent, String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
         // (0) Initialize CEF using the maven loader
         CefAppBuilder builder = new CefAppBuilder();
+
+
+        builder.setProgressHandler(new ConsoleProgressHandler() {
+            @Override
+            public void handleProgress(EnumProgress state, float percent) {
+                // Mettez à jour votre barre de progression ici
+                int i = Math.round(percent);
+                String etat = state.toString();
+                if (i < 99){
+                    ProgressBar.updateProgress(i);
+                } else if (i > 99){
+                    ProgressBar.updateProgress(100);
+                    ProgressBar.closeProgressBar();
+                } else if (percent < 0){
+                    ProgressBar.closeProgressBar();
+                } else if (etat == "INITIALIZED"){
+                    ProgressBar.closeProgressBar();
+                }
+                System.out.println(state);
+                System.out.println("etat : " + etat);
+                System.out.println("Progress: " + percent + "%");
+            }
+        });
+
+
         // windowless_rendering_enabled must be set to false if not wanted. 
         builder.getCefSettings().windowless_rendering_enabled = useOSR;
         // USE builder.setAppHandler INSTEAD OF CefApp.addAppHandler!
@@ -78,6 +107,7 @@ public class App extends JFrame {
         String systemLanguage = Locale.getDefault().getLanguage();
         
         builder.addJcefArgs("--lang", systemLanguage);
+        
         cefApp_ = builder.build();
         
         client_ = cefApp_.createClient();
@@ -173,6 +203,7 @@ public class App extends JFrame {
             }
         });
 
+
         // Gestionnaire de chargement de la page
         client_.addLoadHandler(new CefLoadHandlerAdapter() {
         	public void onLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode) {
@@ -203,8 +234,20 @@ public class App extends JFrame {
 
     public static void main(String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
         UpdateChecker.checkForUpdates(); // Lancer la vérification de la mise à jour
-    //    JOptionPane.showMessageDialog(null, UpdateChecker.CURRENT_VERSION, "null", 0);
+
+        File installDir = new File("jcef-bundle");
+
+        // Vérifiez si le dossier d'installation existe
+        if (!installDir.exists()) {
+            // Le dossier n'existe pas, donc l'installation doit être faite
+            // Affiche la barre de progression pendant l'installation
+            SwingUtilities.invokeLater(ProgressBar::createAndShowProgressBar);
+        } else {
+            System.out.println("Le dossier jcef-bundle existe déjà");
+        }
+        
         boolean useOsr = false;
         new App("https://www.youtube.com/tv#/", useOsr, false, args);
+
     }
 }

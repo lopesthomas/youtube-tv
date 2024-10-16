@@ -12,7 +12,7 @@ import org.json.JSONString;
 
 public class UpdateChecker {
     private static final String VERSION_URL = "https://orange-squirrel-925737.hostingersite.com/version.json";
-    static final String CURRENT_VERSION = "1.0.0"; // Version actuelle
+    static final String CURRENT_VERSION = "1.0.1"; // Version actuelle
     private static final String JAR_NAME = "youtube-tv.jar"; 
     private static final String DOWNLOAD_DIR = "."; 
 

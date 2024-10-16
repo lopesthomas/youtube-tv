@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "download_url": "https://orange-squirrel-925737.hostingersite.com/youtube-tv.jar",
-    "changelog": "Add versioning, update system"
+    "changelog": "Add ProgressBar for Initializing v1.0.1"
 }

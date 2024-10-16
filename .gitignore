@@ -1,6 +1,7 @@
 debug.log
 target
 testes/
+cache
 build/cache
 build/jcef-bundle
 !youtube-tv.jar
