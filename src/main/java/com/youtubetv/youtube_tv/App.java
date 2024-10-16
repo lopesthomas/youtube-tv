@@ -4,9 +4,6 @@
 
 package com.youtubetv.youtube_tv;
 
-import java.util.Locale;
-import java.io.File;
-
 import me.friwi.jcefmaven.*;
 import me.friwi.jcefmaven.impl.step.init.CefInitializer;
 
@@ -21,11 +18,7 @@ import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefRequestContext;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
-//import org.cef.handler.CefRequestHandlerAdapter;
-//import org.cef.handler.CefResourceRequestHandler;
-//import org.cef.handler.CefResourceRequestHandlerAdapter;
-//import org.cef.misc.IntRef;
-//import org.cef.network.CefRequest;
+
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.cef.handler.CefRequestContextHandler;
 import org.cef.handler.CefRequestContextHandlerAdapter;
@@ -39,19 +32,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.io.File;
+import java.util.Locale;
 
-/**
- * This is a simple example application using JCEF.
- * It displays a JFrame with a JTextField at its top and a CefBrowser in its
- * center. The JTextField is used to enter and assign an URL to the browser UI.
- * No additional handlers or callbacks are used in this example.
- *
- * The number of used JCEF classes is reduced (nearly) to its minimum and should
- * assist you to get familiar with JCEF.
- *
- * For a more feature complete example have also a look onto the example code
- * within the package "tests.detailed".
- */
 public class App extends JFrame {
     private static final long serialVersionUID = -5570653778104813836L;
     private final JTextField address_;
@@ -61,13 +44,6 @@ public class App extends JFrame {
     private final Component browerUI_;
     private boolean browserFocus_ = true;
 
-    /**
-     * To display a simple browser window, it suffices completely to create an
-     * instance of the class CefBrowser and to assign its UI component to your
-     * application (e.g. to your content pane).
-     * But to be more verbose, this CTOR keeps an instance of each object on the
-     * way to the browser UI.
-     */
     private App(String startURL, boolean useOSR, boolean isTransparent, String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
         // (0) Initialize CEF using the maven loader
         CefAppBuilder builder = new CefAppBuilder();
@@ -84,10 +60,7 @@ public class App extends JFrame {
         });
         
         if (args.length > 0) {
-        	builder.addJcefArgs(args);
-        
-
-            
+        	builder.addJcefArgs(args);    
         }
 
         // Activer la persistance des cookies de session
@@ -102,59 +75,16 @@ public class App extends JFrame {
 
         System.out.println("CEF lancé avec le cache dans le répertoire : " + cachePath);
 
-
-
-        // (1) The entry point to JCEF is always the class CefApp. There is only one
-        //     instance per application and therefore you have to call the method
-        //     "getInstance()" instead of a CTOR.
-        //
-        //     CefApp is responsible for the global CEF context. It loads all
-        //     required native libraries, initializes CEF accordingly, starts a
-        //     background task to handle CEF's message loop and takes care of
-        //     shutting down CEF after disposing it.
-        //
-        //     WHEN WORKING WITH MAVEN: Use the builder.build() method to
-        //     build the CefApp on first run and fetch the instance on all consecutive
-        //     runs. This method is thread-safe and will always return a valid app
-        //     instance.
         String systemLanguage = Locale.getDefault().getLanguage();
         
         builder.addJcefArgs("--lang", systemLanguage);
         cefApp_ = builder.build();
-        
-        // (2) JCEF can handle one to many browser instances simultaneous. These
-        //     browser instances are logically grouped together by an instance of
-        //     the class CefClient. In your application you can create one to many
-        //     instances of CefClient with one to many CefBrowser instances per
-        //     client. To get an instance of CefClient you have to use the method
-        //     "createClient()" of your CefApp instance. Calling an CTOR of
-        //     CefClient is not supported.
-        //
-        //     CefClient is a connector to all possible events which come from the
-        //     CefBrowser instances. Those events could be simple things like the
-        //     change of the browser title or more complex ones like context menu
-        //     events. By assigning handlers to CefClient you can control the
-        //     behavior of the browser. See tests.detailed.MainFrame for an example
-        //     of how to use these handlers.
         
         client_ = cefApp_.createClient();
         
         // (3) Create a simple message router to receive messages from CEF.
         CefMessageRouter msgRouter = CefMessageRouter.create();
         client_.addMessageRouter(msgRouter);
-
-        // (4) One CefBrowser instance is responsible to control what you'll see on
-        //     the UI component of the instance. It can be displayed off-screen
-        //     rendered or windowed rendered. To get an instance of CefBrowser you
-        //     have to call the method "createBrowser()" of your CefClient
-        //     instances.
-        //
-        //     CefBrowser has methods like "goBack()", "goForward()", "loadURL()",
-        //     and many more which are used to control the behavior of the displayed
-        //     content. The UI is held within a UI-Compontent which can be accessed
-        //     by calling the method "getUIComponent()" on the instance of CefBrowser.
-        //     The UI component is inherited from a java.awt.Component and therefore
-        //     it can be embedded into any AWT UI.
 
         browser_ = client_.createBrowser(startURL, false, isTransparent);
 
@@ -212,15 +142,13 @@ public class App extends JFrame {
             }
         });
         
-        
-        
         // Set the frame to full screen
         setUndecorated(true);  // Enlève la décoration de la fenêtre (barre de titre, bordures)
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Ferme l'application à la fermeture de la fenêtre
 
         // (6) All UI components are assigned to the default content pane of this
         //     JFrame and afterwards the frame is made visible to the user.
-        getContentPane().add(address_, BorderLayout.NORTH);
+      //  getContentPane().add(address_, BorderLayout.NORTH);
         getContentPane().add(browerUI_, BorderLayout.CENTER);
         pack();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -234,7 +162,7 @@ public class App extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setVisible(true);
 
-        // (7) To take care of shutting down CEF accordingly, it's important to call
+        //     To take care of shutting down CEF accordingly, it's important to call
         //     the method "dispose()" of the CefApp instance if the Java
         //     application will be closed. Otherwise you'll get asserts from CEF.
         addWindowListener(new WindowAdapter() {
@@ -242,7 +170,6 @@ public class App extends JFrame {
             public void windowClosing(WindowEvent e) {
                 CefApp.getInstance().dispose();
                 dispose();
-
             }
         });
 
@@ -271,21 +198,13 @@ public class App extends JFrame {
         	    browser.executeJavaScript(loadScript, browser.getURL(), 0);
         	}
         });
-
-        
-        
+   
     }
 
     public static void main(String[] args) throws UnsupportedPlatformException, CefInitializationException, IOException, InterruptedException {
-        //Print some info for the test reports. You can ignore this.
-        // TestReportGenerator.print(args);
-        
-        // The simple example application is created as anonymous class and points
-        // to Google as the very first loaded page. Windowed rendering mode is used by
-        // default. If you want to test OSR mode set |useOsr| to true and recompile.
+        UpdateChecker.checkForUpdates(); // Lancer la vérification de la mise à jour
+    //    JOptionPane.showMessageDialog(null, UpdateChecker.CURRENT_VERSION, "null", 0);
         boolean useOsr = false;
         new App("https://www.youtube.com/tv#/", useOsr, false, args);
     }
-    
-    
 }
