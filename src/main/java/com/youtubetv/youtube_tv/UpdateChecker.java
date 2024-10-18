@@ -4,15 +4,13 @@ import javax.swing.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONString;
-
 
 public class UpdateChecker {
     private static final String VERSION_URL = "https://orange-squirrel-925737.hostingersite.com/version.json";
-    static final String CURRENT_VERSION = "1.0.1"; // Version actuelle
+    static final String CURRENT_VERSION = "1.0.2"; // Current version
+    static final String stringCurrentVersion = CURRENT_VERSION.replace(".", "");
+    static final Integer intCurrentVersion = Integer.valueOf(stringCurrentVersion);
     private static final String JAR_NAME = "youtube-tv.jar"; 
     private static final String DOWNLOAD_DIR = "."; 
 
@@ -32,17 +30,19 @@ public class UpdateChecker {
             conn.disconnect();
 
             JSONObject jsonResponse = new JSONObject(content.toString());
-            String latestVersion = jsonResponse.getString("version");
+            String JSONlatestVersion = jsonResponse.getString("version");
+            String stringLatestVersion = JSONlatestVersion.replace(".", "");
+            Integer intLatestVersion = Integer.valueOf(stringLatestVersion);
             String downloadUrl = jsonResponse.getString("download_url");
 
             System.out.println(jsonResponse);
-            System.out.println("Derniere version" + latestVersion);
-            System.out.println("Download URL" + downloadUrl);
+            System.out.println("Last version " + JSONlatestVersion);
+            System.out.println("Download URL " + downloadUrl);
 
-            if (!CURRENT_VERSION.equals(latestVersion)) {
-                // Afficher la fenêtre de confirmation
+            if (intCurrentVersion < intLatestVersion) {
+                // Show confirmation window
                 int response = JOptionPane.showConfirmDialog(null,
-                        "A new version (" + latestVersion + ") is available. Do you want to update ? \n" + "Current Version : " + CURRENT_VERSION,
+                        "A new version (" + JSONlatestVersion + ") is available. Do you want to update ? \n" + "Current Version : " + CURRENT_VERSION,
                         "Update available",
                         JOptionPane.YES_NO_OPTION);
 
@@ -54,7 +54,7 @@ public class UpdateChecker {
                     
                 }
             } else {
-                System.out.println("Votre application est à jour.");
+                System.out.println("Your application is up to date.");
             }
 
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class UpdateChecker {
         }
     }
 
-    // Téléchargement du nouveau .jar
+    // Download the new .jar
     public static void downloadNewVersion(String downloadUrl, String fileName) throws IOException {
         URL url = new URL(downloadUrl);
         HttpURLConnection httpConnection = (HttpURLConnection) (url.openConnection());
@@ -82,25 +82,25 @@ public class UpdateChecker {
         fileOutputStream.close();
         inputStream.close();
 
-        System.out.println("Nouvelle version téléchargée : " + fileName);
+        System.out.println("New version downloaded : " + fileName);
     }
 
-    // Redémarrage de l'application après mise à jour
+    // After the update (Not working)
     public static void restartApplication() {
         try {
-            // Exécuter le nouveau .jar avec une commande shell
+            // Run the new .jar with a shell command
             String javaBin = System.getProperty("java.home") + "/bin/java";
             File currentJar = new File(UpdateChecker.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
-            // Vérifier si le fichier est un JAR exécutable
+            // Check if the file is an executable JAR
             if (!currentJar.getName().endsWith(".jar")) {
                 return;
             }
 
-            // Commande pour relancer l'application
+            // Command to restart the application
             final String[] command = new String[] { javaBin, " -jar ", currentJar.getPath() };
 
-            // Exécuter la nouvelle commande
+            // Run the new command
             new ProcessBuilder(command).start();
             System.exit(0);
 

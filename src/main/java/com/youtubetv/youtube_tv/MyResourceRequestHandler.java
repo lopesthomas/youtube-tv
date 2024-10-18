@@ -6,7 +6,6 @@ import org.cef.handler.CefResourceRequestHandler;
 import org.cef.misc.BoolRef;
 import org.cef.misc.StringRef;
 
-import java.net.URL;
 import java.util.Locale;
 
 import org.cef.browser.CefBrowser;
@@ -33,7 +32,7 @@ public class MyResourceRequestHandler implements CefResourceRequestHandler {
 		
 		
 		System.out.println(systemLanguage);
-        return false;  // Continuer le chargement
+        return false;
     }
 
 	@Override
@@ -77,5 +76,4 @@ public class MyResourceRequestHandler implements CefResourceRequestHandler {
 		
 	}
 
-    // Implémentez les autres méthodes de l'interface ici (comme requis)
 }

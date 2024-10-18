@@ -7,9 +7,18 @@ public class ProgressBar {
     public static JProgressBar progressBar;  // Déclarez-le ici en tant que champ statique
     private static JFrame frame;
 
+    public static boolean isInGameMode() {
+        String steamDeck = System.getenv("SteamDeck");
+        String steamGamepadUI = System.getenv("SteamGamepadUI");
+        String steamOS = System.getenv("SteamOS");
+    
+        // Vérifier si l'une des variables pertinentes est présente
+        return "1".equals(steamDeck) || "1".equals(steamGamepadUI) || "1".equals(steamOS);
+    }
+
     public static void createAndShowProgressBar() {
         // Créer la fenêtre
-        frame = new JFrame("Initializing...");
+        frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.setSize(400, 100);
         frame.setLayout(new BorderLayout());
@@ -22,6 +31,11 @@ public class ProgressBar {
         // Ajouter la barre de progression à la fenêtre
         frame.add(progressBar, BorderLayout.CENTER);
         frame.setLocationRelativeTo(null);  // Centrer la fenêtre
+        frame.setResizable(false);
+        isInGameMode();
+        if (isInGameMode()) {
+            frame.pack();
+        }
         frame.setVisible(true);
     }
 
