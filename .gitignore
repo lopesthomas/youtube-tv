@@ -6,6 +6,9 @@ build/cache
 build/jcef-bundle
 !youtube-tv.jar
 .classpath
+.settings/
+.vscode/
+.mvn/
 jcef-bundle/
 jcef-bundle/build_meta.json
 jcef-bundle/chrome_100_percent.pak
