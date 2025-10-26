@@ -8,7 +8,7 @@ import org.json.JSONObject;
 
 public class UpdateChecker {
     private static final String VERSION_URL = "https://orange-squirrel-925737.hostingersite.com/version.json";
-    static final String CURRENT_VERSION = "1.0.2"; // Current version
+    static final String CURRENT_VERSION = "1.0.3"; // Current version
     static final String stringCurrentVersion = CURRENT_VERSION.replace(".", "");
     static final Integer intCurrentVersion = Integer.valueOf(stringCurrentVersion);
     private static final String JAR_NAME = "youtube-tv.jar"; 
